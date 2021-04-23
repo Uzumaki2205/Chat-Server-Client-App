@@ -25,7 +25,6 @@ namespace Server
         public MainWindow()
         {
             InitializeComponent();
-
             backgroundWork();
         }
 
@@ -41,6 +40,9 @@ namespace Server
         }
         private static BackgroundWorker backgroundWorker;
 
+        /// <summary>
+        /// Init Run Process in Background
+        /// </summary>
         void backgroundWork()
         {
             backgroundWorker = new BackgroundWorker
@@ -54,14 +56,12 @@ namespace Server
             backgroundWorker.RunWorkerAsync(10000);
 
             if (backgroundWorker.IsBusy)
-            {
-
                 backgroundWorker.CancelAsync();
-
-                Console.ReadLine();
-
-            }
         }
+
+        /// <summary>
+        /// Connect Async
+        /// </summary>
         void ConnectAsync()
         {
             try
@@ -86,7 +86,6 @@ namespace Server
                         }));
                     }
 
-
                     Thread receive = new Thread(Receive);
                     receive.IsBackground = true;
                     receive.Start(client);
@@ -109,11 +108,21 @@ namespace Server
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Run in background process Connect
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             ConnectAsync();
         }
 
+
+        /// <summary>
+        /// Receive message from client
+        /// </summary>
+        /// <param name="obj"></param>
         void Receive(object obj)
         {
             Socket client = obj as Socket;
@@ -140,6 +149,10 @@ namespace Server
             }
         }
 
+        /// <summary>
+        /// Add Message To List View
+        /// </summary>
+        /// <param name="s"></param>
         void AddMessage(string s)
         {
             lsvMess.Items.Add(new ListViewItem() { Content = s });
@@ -147,6 +160,10 @@ namespace Server
             tbxMess.Clear();
         }
 
+        /// <summary>
+        /// Send Message as Socket
+        /// </summary>
+        /// <param name="client"></param>
         void Send(Socket client)
         {
             if (tbxMess.Text != string.Empty)
