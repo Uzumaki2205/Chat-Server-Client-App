@@ -21,22 +21,19 @@ namespace Client
         public MainWindow()
         {
             InitializeComponent();
-
-            Thread thread = new Thread(() => ConnectToServer());
-            //ConnectToServer();
-            thread.IsBackground = true;
-            thread.Start();
         }
         public IPEndPoint IP { get; set; }
         public Socket Client { get; set; }
+        public string Nickname { get; set; }
 
         void ConnectToServer()
         {
-            IP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888);
-            Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
+                IP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888);
+                Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 Client.Connect(IP);
+                MessageBox.Show("Connect Success!!");
             }
             catch (Exception)
             {
@@ -46,6 +43,15 @@ namespace Client
             Thread listen = new Thread(ReceiveMessage);
             listen.IsBackground = true;
             listen.Start();
+        }
+
+        void SendNickname()
+        {
+            if (tbxNickName.Text == string.Empty)
+                Nickname = "Anonymous";
+            else Nickname = tbxNickName.Text;
+
+            Client.Send(Serialize($"[Authorization]:{Nickname}"));
         }
 
         void ReceiveMessage()
@@ -70,24 +76,24 @@ namespace Client
         void AddMessage(string s)
         {
             lsvMess.Items.Add(new ListViewItem() { Content = s });
-            
             tbxMess.Clear();
         }
 
         void Send()
         {
-            if (tbxMess.Text != string.Empty)
-                Client.Send(Serialize(tbxMess.Text));
+            Client.Send(Serialize($"{Nickname}:{tbxMess.Text}"));
         }
 
         private void btnSendMess_Click(object sender, RoutedEventArgs e)
         {
-            Send();
-            lsvMess.Items.Add(new ListViewItem() { Content = tbxMess.Text });
-            tbxMess.Clear();
+            if (tbxMess.Text != string.Empty)
+            {
+                Send();
+                lsvMess.Items.Add(new ListViewItem() { Content = tbxMess.Text });
+                tbxMess.Clear();
+            }   
         }
 
-      
         private void Window_Closed(object sender, EventArgs e)
         {
             Closes();
@@ -121,6 +127,23 @@ namespace Client
             {
                 btnSendMess_Click(sender, null);
             }
+        }
+
+        private void btnConnect_Click(object sender, RoutedEventArgs e)
+        {
+            Thread thread = new Thread(() => ConnectToServer());
+            thread.IsBackground = true;
+            thread.Start();
+        }
+
+        private void btnNickname_Click(object sender, RoutedEventArgs e)
+        {
+            SendNickname();
+        }
+
+        private void btnDisconnect_Click(object sender, RoutedEventArgs e)
+        {
+            Client.Send(Serialize($"{Nickname}:exit"));
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Server
     {
         public IPEndPoint IP { get; set; }
         public Socket Server { get; set; }
-        public List<Socket> ClientList { get; set; }
+        public List<Users> ClientList { get; set; }
         public MainWindow()
         {
             InitializeComponent();
@@ -30,13 +30,16 @@ namespace Server
 
         private void btnSendMess_Click(object sender, RoutedEventArgs e)
         {
-            foreach (Socket item in ClientList)
+            if (tbxMess.Text != string.Empty)
             {
-                Send(item);
-            }
+                foreach (var item in ClientList)
+                {
+                    Send(item.IPUser);
+                }
 
-            AddMessage(tbxMess.Text);
-            tbxMess.Clear();
+                AddMessage(tbxMess.Text);
+                tbxMess.Clear();
+            }   
         }
         private static BackgroundWorker backgroundWorker;
 
@@ -66,7 +69,7 @@ namespace Server
         {
             try
             {
-                ClientList = new List<Socket>();
+                ClientList = new List<Users>();
                 IP = new IPEndPoint(IPAddress.Any, 8888);
                 Server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
                 Server.Bind(IP);
@@ -75,16 +78,7 @@ namespace Server
                 {
                     Server.Listen(100);
                     Socket client = Server.Accept();
-                    ClientList.Add(client);
-                    //MessageBox.Show("new client connect");
-                    string s = client.RemoteEndPoint.ToString();
-                    if(!cbxListClient.Items.Contains(s))
-                    {
-                        this.Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            cbxListClient.Items.Add(new ComboBoxItem() { Content = s });
-                        }));
-                    }
+                    //ClientList.Add(client);
 
                     Thread receive = new Thread(Receive);
                     receive.IsBackground = true;
@@ -100,7 +94,8 @@ namespace Server
 
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            throw new NotImplementedException();
+            Closes();
+            MessageBox.Show("ShutDown Server....");
         }
 
         private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -135,16 +130,70 @@ namespace Server
 
                     string message = (string)Deserialize(data);
 
-                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    if (message.Contains("exit"))
                     {
-                        AddMessage(message);
-                    }));
-                    
+                        Users u = new Users();
+                        string nickname = message.Replace(":exit", "");
+                        if (ClientList.Count != 0)
+                        {
+                            foreach (var item in ClientList)
+                            {
+                                if (item.NickName == nickname)
+                                {
+                                    u = item;
+                                }
+                            }
+                            ClientList.Remove(u);
+                        }
+                    }
+                    else if (!message.Contains("[Authorization]"))
+                    {
+                        this.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            AddMessage($"{message}");
+                        }));
+                    }
+                    else
+                    {
+                        string nickname = message.Replace("[Authorization]:", "");
+                        Users user = new Users() { IPUser = client, NickName = nickname };
+
+                        int i = 0;
+                        if (ClientList.Count != 0)
+                        { 
+                            foreach (var item in ClientList)
+                            {
+                                if (item.NickName.Equals(nickname))
+                                    i++;
+                            }
+                            if (i == 0)
+                            {
+                                ClientList.Add(user);
+                                this.Dispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    cbxListClient.Items.Add(new ComboBoxItem() { Content = nickname });
+                                }));
+                            }
+                            else client.Send(Serialize("User is exist"));
+                        }
+                        else
+                        {
+                            ClientList.Add(user);
+                            this.Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                cbxListClient.Items.Add(new ComboBoxItem() { Content = nickname });
+                            }));
+                        }
+                    }
                 }
             }
             catch (Exception)
             {
-                ClientList.Remove(client);
+                foreach (var item in ClientList)
+                {
+                    if (item.IPUser.Equals(client))
+                        ClientList.Remove(item);
+                }
                 client.Close();
             }
         }
@@ -166,8 +215,7 @@ namespace Server
         /// <param name="client"></param>
         void Send(Socket client)
         {
-            if (tbxMess.Text != string.Empty)
-                client.Send(Serialize(tbxMess.Text));
+            client.Send(Serialize(tbxMess.Text));
         }
 
         void Closes()
@@ -204,5 +252,11 @@ namespace Server
                 btnSendMess_Click(sender, null);
             }
         }
+    }
+
+    public class Users
+    {
+        public Socket IPUser { get; set; }
+        public string NickName { get; set; }
     }
 }

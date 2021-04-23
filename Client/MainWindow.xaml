@@ -15,7 +15,7 @@
      TextOptions.TextRenderingMode="Auto"
      Background="{DynamicResource MaterialDesignPaper}"
      FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="Client" Height="380" Width="400">
+        Title="Client" Height="500" Width="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -36,6 +36,36 @@
 
         <Grid Grid.Row="1">
             <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Margin="10"
+                        x:Name="MaterialDesignOutlinedPasswordFieldPasswordBoxEnabledComboBox">
+                        Edit
+                    </CheckBox>
+                    <TextBox x:Name="tbxNickName"
+                        Style="{StaticResource MaterialDesignOutlinedTextFieldTextBox}"
+                        VerticalAlignment="Top"
+                        IsEnabled="{Binding Path=IsChecked, ElementName=MaterialDesignOutlinedPasswordFieldPasswordBoxEnabledComboBox}"
+                        materialDesign:HintAssist.Hint="Enter your nick name" />
+                </StackPanel>
+               
+                <StackPanel Margin="10" Orientation="Horizontal" HorizontalAlignment="Right">
+                    
+                    <Button Name="btnConnect" Margin="10 0 0 0"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        ToolTip="Connect To Server" Click="btnConnect_Click"
+                            Content="Connect">
+                    </Button>
+                    <Button Name="btnDisconnect" Margin="10 0 0 0"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        ToolTip="Dis To Server" Click="btnDisconnect_Click"
+                            Content="Disconect">
+                    </Button>
+                    <Button Name="btnNickname" Margin="5 0 0 0"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        ToolTip="Connect To Server" Click="btnNickname_Click"
+                            Content="Apply Nick">
+                    </Button>
+                </StackPanel>
                 <TextBlock Text="Message"/>
                 <ListView x:Name="lsvMess" Height="120" >
                 </ListView>
