@@ -13,8 +13,8 @@
 > Syntax: [Sum]:[num1 num2 num3]
 > Example: [Sum]:[0 2 3 4 5 6]
 - Find Max in Array
-> Syntax: [Sum]:[num1 num2 num3]
-> Example: [Sum]:[0 2 3 4 5 6]
+> Syntax: [MAX]:[num1 num2 num3]
+> Example: [MAX]:[0 2 3 4 5 6]
 ## Customize
 - Can edit IP or Port in MainWindow.xaml.cs (included Client, Server)
 > Devloping ...
