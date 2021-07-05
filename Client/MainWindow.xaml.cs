@@ -81,7 +81,14 @@ namespace Client
 
         void Send()
         {
-            Client.Send(Serialize($"{Nickname}:{tbxMess.Text}"));
+            try
+            {
+                Client.Send(Serialize($"{Nickname}:{tbxMess.Text}"));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void btnSendMess_Click(object sender, RoutedEventArgs e)
