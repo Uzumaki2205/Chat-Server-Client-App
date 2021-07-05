@@ -130,6 +130,32 @@ namespace Server
 
                     string message = (string)Deserialize(data);
 
+                    if (message.Contains("[Sum]:["))
+                    {
+                        string substring_name = message.Substring(message.IndexOf("["));
+                        string substrin_message = substring_name.Substring(6, substring_name.Length-6).Replace("[", "").Replace("]", "").Replace(" ", "");
+                        int sum = 0;
+                        foreach (var item in substrin_message)
+                        {
+                            int num = int.Parse(item.ToString());
+                            if (num % 2 == 0)
+                                sum += int.Parse(item.ToString());
+                        }
+                        client.Send(Serialize("Sum = " + sum.ToString()));
+                    }
+                    if (message.Contains("[MAX]:["))
+                    {
+                        string substring_name = message.Substring(message.IndexOf("["));
+                        string substrin_message = substring_name.Substring(6, substring_name.Length - 6).Replace("[", "").Replace("]", "").Replace(" ", "");
+
+                        List<int> Max = new List<int>();
+                        foreach (var item in substrin_message)
+                        {
+                            Max.Add(int.Parse(item.ToString()));
+                        }
+
+                        client.Send(Serialize("MAX = " + Max.Max().ToString()));
+                    }
                     if (message.Contains("exit"))
                     {
                         Users u = new Users();
